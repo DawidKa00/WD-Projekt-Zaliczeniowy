@@ -47,7 +47,12 @@ Zbiór nadaje się do zadań z zakresu EDA, regresji, klasyfikacji, a także do 
     `pip install -r requirements.txt`
 
 
-3. Uruchom aplikację:
+3. Jeśli nie masz jeszcze danych w folderze data/, dodaj swój plik kaggle.json (z zakładki "My Account" na kaggle.com):
+   
+* Umieść `kaggle.json` w folderze głównym projektu (np. student-dashboard/)
+* Plik zostanie automatycznie użyty do pobrania danych podczas pierwszego uruchomienia
+
+4. Uruchom aplikację:
 
     `python app.py`
 
