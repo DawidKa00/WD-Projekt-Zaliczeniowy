@@ -40,7 +40,7 @@ Zbiór nadaje się do zadań z zakresu EDA, regresji, klasyfikacji, a także do 
 1. Sklonuj repozytorium:
 
 `git clone https://github.com/DawidKa00/WD-Projekt-Zaliczeniowy` \
-`cd student-dashboard`
+`cd WD-Projekt-Zaliczeniowy`
 
 2. Zainstaluj zależności:
 
@@ -49,11 +49,11 @@ Zbiór nadaje się do zadań z zakresu EDA, regresji, klasyfikacji, a także do 
 
 3. Jeśli nie masz jeszcze danych w folderze data/, dodaj swój plik kaggle.json (z zakładki "My Account" na kaggle.com):
    
-* Umieść `kaggle.json` w folderze głównym projektu (np. student-dashboard/)
+* Umieść `kaggle.json` w folderze głównym projektu (np. WD-Projekt-Zaliczeniowy/)
 * Plik zostanie automatycznie użyty do pobrania danych podczas pierwszego uruchomienia
 
 4. Uruchom aplikację:
 
-    `python app.py`
+    `python main.py`
 
 Dashboard będzie dostępny pod adresem http://127.0.0.1:8050/.
