@@ -13,7 +13,7 @@ def download_data_if_needed() -> None:
 
         os.makedirs(DATA_DIR, exist_ok=True)
         if not os.path.exists('kaggle.json'):
-            print("❌ Nie znaleziono pliku kaggle.json w katalogu głównego projekty – potrzebne do pobierania danych z Kaggle.")
+            print("❌ Nie znaleziono pliku kaggle.json w katalogu głównego projektu – potrzebne do pobierania danych z Kaggle.")
             return
         os.environ['KAGGLE_CONFIG_DIR'] = os.getcwd()
 
