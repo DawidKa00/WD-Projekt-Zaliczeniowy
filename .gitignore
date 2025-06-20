@@ -171,3 +171,4 @@ instance/*
 # Data in zip
 *.zip
 
+.idea/
