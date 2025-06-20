@@ -8,6 +8,7 @@ KAGGLE_DATASET = "jayaantanaath/student-habits-vs-academic-performance"
 KAGGLE_ZIP = "student-habits-vs-academic-performance.zip"
 
 def download_data_if_needed() -> None:
+    """Sprawdza, czy plik z danymi istnieje, i pobiera go w razie potrzeby"""
     if not os.path.exists(os.path.join(DATA_DIR, CSV_FILENAME)):
         print("📥 Dane nie znalezione lokalnie – rozpoczynam pobieranie z Kaggle...")
 
