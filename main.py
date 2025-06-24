@@ -154,6 +154,75 @@ class StudentPerformanceDashboard:
             aspect="auto",  # Automatyczne dopasowanie proporcji
         )
 
+    def create_exam_score_histogram(self, filtered_df: pd.DataFrame) -> go.Figure:
+        """Tworzy histogram rozkładu wyników egzaminu z podziałem na płeć."""
+        if filtered_df.empty:
+            return px.histogram(title="Rozkład wyników egzaminu (Brak danych)")
+
+        return px.histogram(
+            filtered_df,
+            x="exam_score",
+            color="gender",
+            nbins=20,
+            barmode='overlay',
+            opacity=0.6,
+            title="Rozkład wyników egzaminu wg płci",
+            labels={
+                "exam_score": "Wynik egzaminu",
+                "gender": "Płeć"
+            }
+        )
+
+    def create_bar_avg_score_by_edu(self, filtered_df: pd.DataFrame) -> go.Figure:
+        """Tworzy wykres słupkowy średnich wyników wg wykształcenia rodziców."""
+        if filtered_df.empty:
+            return px.bar(title="Średnie wyniki wg poziomu edukacji rodziców (Brak danych)")
+
+        avg_scores = (
+            filtered_df
+            .groupby("parental_education_level")["exam_score"]
+            .mean()
+            .sort_values()
+            .reset_index()
+        )
+
+        return px.bar(
+            avg_scores,
+            x="parental_education_level",
+            y="exam_score",
+            title="Średnie wyniki egzaminów wg wykształcenia rodziców",
+            labels={
+                "parental_education_level": "Poziom wykształcenia rodziców",
+                "exam_score": "Średni wynik egzaminu"
+            }
+        )
+
+    def create_sleep_vs_score_lineplot(self, filtered_df: pd.DataFrame) -> go.Figure:
+        """Tworzy wykres liniowy: średni wynik egzaminu w zależności od liczby godzin snu."""
+        if filtered_df.empty:
+            return px.line(title="Średni wynik vs liczba godzin snu (Brak danych)")
+
+        df_grouped = (
+            filtered_df
+            .copy()
+            .assign(sleep_hours_rounded=lambda df: df['sleep_hours'].round())
+            .groupby("sleep_hours_rounded")["exam_score"]
+            .mean()
+            .reset_index()
+        )
+
+        return px.line(
+            df_grouped,
+            x="sleep_hours_rounded",
+            y="exam_score",
+            markers=True,
+            title="Średni wynik egzaminu w zależności od liczby godzin snu",
+            labels={
+                "sleep_hours_rounded": "Godziny snu (zaokrąglone)",
+                "exam_score": "Średni wynik egzaminu"
+            }
+        )
+
     def setup_layout(self):
         """Konfiguruje układ (layout) dashboardu."""
         # Jeśli dane nie zostały załadowane, wyświetl komunikat o błędzie
@@ -224,9 +293,42 @@ class StudentPerformanceDashboard:
             ], style={"marginBottom": "30px"}),
 
             # Sekcja z wykresami (placeholdery)
-            dcc.Graph(id="scatter-plot"),  # Miejsce na wykres rozrzutu
-            dcc.Graph(id="box-plot"),      # Miejsce na wykres pudełkowy
-            dcc.Graph(id="heatmap")        # Miejsce na mapę ciepła
+            # Wykres rozrzutu
+            html.H3("📍 Wpływ nauki na wynik egzaminu"),
+            html.P(
+                "Ten wykres pokazuje zależność między dzienną liczbą godzin nauki a uzyskanym wynikiem egzaminu. Każdy punkt reprezentuje jednego studenta."),
+            dcc.Graph(id="scatter-plot"),
+
+            # Wykres pudełkowy
+            html.H3("📍 Rozkład wyników wg płci"),
+            html.P(
+                "Wykres pudełkowy przedstawia różnice w rozkładzie wyników egzaminów pomiędzy grupami płci. Widzimy medianę, kwartyle oraz wartości odstające."),
+            dcc.Graph(id="box-plot"),
+
+            # Mapa korelacji
+            html.H3("📍 Korelacje między cechami"),
+            html.P(
+                "Mapa ciepła pokazuje siłę i kierunek zależności pomiędzy cechami numerycznymi, takimi jak godziny nauki, snu, korzystanie z social mediów oraz wynik egzaminu."),
+            dcc.Graph(id="heatmap"),
+
+            # Histogram wyników
+            html.H3("📍 Rozkład wyników egzaminu wg płci"),
+            html.P(
+                "Histogram przedstawia, jak rozkładają się wyniki egzaminów w zależności od płci. Pomaga zidentyfikować różnice w poziomie osiągnięć."),
+            dcc.Graph(id="histogram_fig"),
+
+            # Bar chart wg edukacji rodziców
+            html.H3("📍 Średnie wyniki wg poziomu edukacji rodziców"),
+            html.P(
+                "Wykres słupkowy prezentuje średnie wyniki egzaminów w zależności od poziomu wykształcenia rodziców. Pokazuje możliwy wpływ środowiska domowego."),
+            dcc.Graph(id="barchart_fig"),
+
+            # Liniowy: sen vs wynik
+            html.H3("📍 Liczba godzin snu a wynik egzaminu"),
+            html.P(
+                "Wykres pokazuje, jak średni wynik egzaminu zmienia się wraz ze wzrostem liczby godzin snu. Dane są zagregowane po zaokrąglonych wartościach."),
+            dcc.Graph(id="line_fig")
+
         ], style={"padding": "20px",
                   "padding-left": "200px",
                   "padding-right": "200px"})
@@ -236,14 +338,17 @@ class StudentPerformanceDashboard:
         @self.app.callback(
             [Output("scatter-plot", "figure"),
              Output("box-plot", "figure"),
-             Output("heatmap", "figure")],
+             Output("heatmap", "figure"),
+             Output("histogram_fig", "figure"),
+             Output("barchart_fig", "figure"),
+             Output("line_fig", "figure")],
             [Input("gender-filter", "value"),
              Input("edu-filter", "value"),
              Input("study-hours-slider", "value")]
         )
         def update_graphs(selected_gender: Optional[List[str]],
                           selected_edu: Optional[List[str]],
-                          study_hours_range: List[int]) -> Tuple[go.Figure, go.Figure, go.Figure]:
+                          study_hours_range: List[int]) -> Tuple[go.Figure, go.Figure, go.Figure, go.Figure, go.Figure, go.Figure]:
             """Aktualizuje wszystkie wykresy na podstawie wybranych filtrów."""
             # 1. Filtruj dane na podstawie bieżących wartości filtrów
             filtered_df = self.filter_data(selected_gender, selected_edu, study_hours_range)
@@ -252,9 +357,12 @@ class StudentPerformanceDashboard:
             scatter_fig = self.create_scatter_plot(filtered_df)
             box_fig = self.create_box_plot(filtered_df)
             heatmap_fig = self.create_heatmap(filtered_df)
+            histogram_fig = self.create_exam_score_histogram(filtered_df)
+            barchart_fig = self.create_bar_avg_score_by_edu(filtered_df)
+            line_fig = self.create_sleep_vs_score_lineplot(filtered_df)
 
             # 3. Zwróć zaktualizowane figury do odpowiednich komponentów `dcc.Graph`
-            return scatter_fig, box_fig, heatmap_fig
+            return scatter_fig, box_fig, heatmap_fig, histogram_fig, barchart_fig, line_fig
 
     def run(self, debug: bool = True, host: str = '127.0.0.1', port: int = 8050):
         """Uruchamia aplikację dashboardu."""
