@@ -7,14 +7,48 @@ import plotly.graph_objects as go
 from data_loader import download_data_if_needed
 
 
+def create_scatter_plot(filtered_df: pd.DataFrame, template) -> go.Figure:
+    """Tworzy wykres rozrzutu pokazujący zależność między godzinami nauki a wynikiem egzaminu."""
+    # Jeśli przefiltrowane dane są puste, zwróć pusty wykres z informacją
+    if filtered_df.empty:
+        return px.scatter(title="Wpływ czasu nauki na wynik egzaminu (Brak danych)")
+
+    # Tworzenie wykresu rozrzutu
+    return px.scatter(
+        filtered_df,
+        x="study_hours_per_day",
+        y="exam_score",
+        color="gender",
+        hover_data=['social_media_hours', 'sleep_hours'],  # Dodatkowe informacje po najechaniu myszką
+        template=template,
+        title="Wpływ czasu nauki na wynik egzaminu",
+        labels={
+            'gender': 'Płeć',
+            'study_hours_per_day': 'Godziny nauki dziennie',
+            'exam_score': 'Wynik egzaminu',
+            'social_media_hours': 'Social media hours',
+            'sleep_hours': 'Godziny snu'
+        }
+    )
+
+
 class StudentPerformanceDashboard:
     """Klasa reprezentująca dashboard do analizy nawyków studentów w kontekście ich wyników w nauce."""
 
     def __init__(self):
         """Konstruktor klasy. Inicjalizuje aplikację Dash i przygotowuje miejsce na dane."""
-        self.df = None
-        self.app = dash.Dash(__name__)
-        self.app.title = "Nawyki studentów a wyniki w nauce"  # Ustawienie tytułu aplikacji widocznego w przeglądarce
+        import dash_bootstrap_components as dbc
+
+        self.app = dash.Dash(
+            __name__,
+            external_stylesheets=[dbc.themes.FLATLY]
+        )
+        self.app.title = "Nawyki studentów a wyniki w nauce"
+        self.current_theme = dbc.themes.BOOTSTRAP
+        self.themes = {
+            "Jasny": dbc.themes.FLATLY,
+            "Ciemny": dbc.themes.DARKLY
+        }
 
     def load_data(self) -> bool:
         """Ładuje i waliduje dane z pliku CSV."""
@@ -87,30 +121,7 @@ class StudentPerformanceDashboard:
 
         return filtered_df
 
-    def create_scatter_plot(self, filtered_df: pd.DataFrame) -> go.Figure:
-        """Tworzy wykres rozrzutu pokazujący zależność między godzinami nauki a wynikiem egzaminu."""
-        # Jeśli przefiltrowane dane są puste, zwróć pusty wykres z informacją
-        if filtered_df.empty:
-            return px.scatter(title="Wpływ czasu nauki na wynik egzaminu (Brak danych)")
-
-        # Tworzenie wykresu rozrzutu
-        return px.scatter(
-            filtered_df,
-            x="study_hours_per_day",
-            y="exam_score",
-            color="gender",
-            hover_data=['social_media_hours', 'sleep_hours'],  # Dodatkowe informacje po najechaniu myszką
-            title="Wpływ czasu nauki na wynik egzaminu",
-            labels={
-                'gender': 'Płeć',
-                'study_hours_per_day': 'Godziny nauki dziennie',
-                'exam_score': 'Wynik egzaminu',
-                'social_media_hours': 'Social media hours',
-                'sleep_hours': 'Godziny snu'
-            }
-        )
-
-    def create_box_plot(self, filtered_df: pd.DataFrame) -> go.Figure:
+    def create_box_plot(self, filtered_df: pd.DataFrame, template) -> go.Figure:
         """Tworzy wykres pudełkowy dla wyników egzaminu w podziale na płeć."""
         # Jeśli przefiltrowane dane są puste, zwróć pusty wykres z informacją
         if filtered_df.empty:
@@ -122,6 +133,7 @@ class StudentPerformanceDashboard:
             x="gender",
             y="exam_score",
             color="gender",
+            template=template,
             title="Rozkład wyników egzaminu względem płci",
             labels={
                 'gender': 'Płeć',
@@ -129,7 +141,7 @@ class StudentPerformanceDashboard:
             }
         )
 
-    def create_heatmap(self, filtered_df: pd.DataFrame) -> go.Figure:
+    def create_heatmap(self, filtered_df: pd.DataFrame, template) -> go.Figure:
         """Tworzy mapę ciepła korelacji."""
         # Jeśli przefiltrowane dane są puste, zwróć pusty wykres z informacją
         if filtered_df.empty:
@@ -150,11 +162,12 @@ class StudentPerformanceDashboard:
         return px.imshow(
             heatmap_df,
             text_auto=True,  # Automatyczne wyświetlanie wartości korelacji na mapie
+            template=template,
             title="Korelacje między cechami",
             aspect="auto",  # Automatyczne dopasowanie proporcji
         )
 
-    def create_exam_score_histogram(self, filtered_df: pd.DataFrame) -> go.Figure:
+    def create_exam_score_histogram(self, filtered_df: pd.DataFrame, template) -> go.Figure:
         """Tworzy histogram rozkładu wyników egzaminu z podziałem na płeć."""
         if filtered_df.empty:
             return px.histogram(title="Rozkład wyników egzaminu (Brak danych)")
@@ -166,6 +179,7 @@ class StudentPerformanceDashboard:
             nbins=20,
             barmode='overlay',
             opacity=0.6,
+            template=template,
             title="Rozkład wyników egzaminu wg płci",
             labels={
                 "exam_score": "Wynik egzaminu",
@@ -173,7 +187,7 @@ class StudentPerformanceDashboard:
             }
         )
 
-    def create_bar_avg_score_by_edu(self, filtered_df: pd.DataFrame) -> go.Figure:
+    def create_bar_avg_score_by_edu(self, filtered_df: pd.DataFrame, template) -> go.Figure:
         """Tworzy wykres słupkowy średnich wyników wg wykształcenia rodziców."""
         if filtered_df.empty:
             return px.bar(title="Średnie wyniki wg poziomu edukacji rodziców (Brak danych)")
@@ -190,6 +204,7 @@ class StudentPerformanceDashboard:
             avg_scores,
             x="parental_education_level",
             y="exam_score",
+            template=template,
             title="Średnie wyniki egzaminów wg wykształcenia rodziców",
             labels={
                 "parental_education_level": "Poziom wykształcenia rodziców",
@@ -197,7 +212,7 @@ class StudentPerformanceDashboard:
             }
         )
 
-    def create_sleep_vs_score_lineplot(self, filtered_df: pd.DataFrame) -> go.Figure:
+    def create_sleep_vs_score_lineplot(self, filtered_df: pd.DataFrame, template) -> go.Figure:
         """Tworzy wykres liniowy: średni wynik egzaminu w zależności od liczby godzin snu."""
         if filtered_df.empty:
             return px.line(title="Średni wynik vs liczba godzin snu (Brak danych)")
@@ -216,6 +231,7 @@ class StudentPerformanceDashboard:
             x="sleep_hours_rounded",
             y="exam_score",
             markers=True,
+            template=template,
             title="Średni wynik egzaminu w zależności od liczby godzin snu",
             labels={
                 "sleep_hours_rounded": "Godziny snu (zaokrąglone)",
@@ -233,6 +249,19 @@ class StudentPerformanceDashboard:
             ])
             return
 
+        def themed_div(children):
+            return html.Div(
+                children=children,
+                id="themed-layout", #ID, którego użyjemy w callbacku do zmiany stylu
+                style={
+                    "padding": "20px",
+                    "padding-left": "200px",
+                    "padding-right": "200px",
+                    "backgroundColor": "white",  # domyślnie jasne
+                    "color": "black"  # domyślnie czarny tekst
+                }
+            )
+
         # Przygotowanie opcji dla filtrów (list rozwijanych)
         gender_options = [
             {'label': str(gender), 'value': str(gender)}
@@ -249,10 +278,25 @@ class StudentPerformanceDashboard:
         max_hours = int(self.df['study_hours_per_day'].max())
 
         # Definicja struktury HTML dashboardu
-        self.app.layout = html.Div([
+        self.app.layout = themed_div([
             # Nagłówek główny
             html.H1("📊 Nawyki studentów a wyniki w nauce",
                     style={"textAlign": "center", "marginBottom": "30px"}),
+
+            html.Div([
+                html.Label("🌗 Tryb wyświetlania:", style={"fontWeight": "bold"}),
+                dcc.RadioItems(
+                    id="theme-selector",
+                    options=[
+                        {"label": "Jasny", "value": "Jasny"},
+                        {"label": "Ciemny", "value": "Ciemny"}
+                    ],
+                    value="Jasny",
+                    labelStyle={'display': 'inline-block', 'marginRight': '15px'}
+                ),
+                dcc.Store(id='theme-store', data="Jasny")
+            ], style={"marginBottom": "20px"}),
+
 
             # Sekcja z filtrami
             html.Div([
@@ -329,9 +373,7 @@ class StudentPerformanceDashboard:
                 "Wykres pokazuje, jak średni wynik egzaminu zmienia się wraz ze wzrostem liczby godzin snu. Dane są zagregowane po zaokrąglonych wartościach."),
             dcc.Graph(id="line_fig")
 
-        ], style={"padding": "20px",
-                  "padding-left": "200px",
-                  "padding-right": "200px"})
+        ])
 
     def setup_callbacks(self):
         """Konfiguruje callbacki, które zapewniają interaktywność dashboardu."""
@@ -344,25 +386,58 @@ class StudentPerformanceDashboard:
              Output("line_fig", "figure")],
             [Input("gender-filter", "value"),
              Input("edu-filter", "value"),
-             Input("study-hours-slider", "value")]
+             Input("study-hours-slider", "value"),
+             Input("theme-store", "data")]
         )
         def update_graphs(selected_gender: Optional[List[str]],
                           selected_edu: Optional[List[str]],
-                          study_hours_range: List[int]) -> Tuple[go.Figure, go.Figure, go.Figure, go.Figure, go.Figure, go.Figure]:
+                          study_hours_range: List[int],
+                          current_theme) -> Tuple[go.Figure, go.Figure, go.Figure, go.Figure, go.Figure, go.Figure]:
             """Aktualizuje wszystkie wykresy na podstawie wybranych filtrów."""
+            template = "plotly_dark" if current_theme == "Ciemny" else "plotly_white"
+
             # 1. Filtruj dane na podstawie bieżących wartości filtrów
             filtered_df = self.filter_data(selected_gender, selected_edu, study_hours_range)
 
             # 2. Wygeneruj nowe wykresy na podstawie przefiltrowanych danych
-            scatter_fig = self.create_scatter_plot(filtered_df)
-            box_fig = self.create_box_plot(filtered_df)
-            heatmap_fig = self.create_heatmap(filtered_df)
-            histogram_fig = self.create_exam_score_histogram(filtered_df)
-            barchart_fig = self.create_bar_avg_score_by_edu(filtered_df)
-            line_fig = self.create_sleep_vs_score_lineplot(filtered_df)
+            scatter_fig = create_scatter_plot(filtered_df, template)
+            box_fig = self.create_box_plot(filtered_df, template)
+            heatmap_fig = self.create_heatmap(filtered_df, template)
+            histogram_fig = self.create_exam_score_histogram(filtered_df, template)
+            barchart_fig = self.create_bar_avg_score_by_edu(filtered_df, template)
+            line_fig = self.create_sleep_vs_score_lineplot(filtered_df, template)
 
             # 3. Zwróć zaktualizowane figury do odpowiednich komponentów `dcc.Graph`
             return scatter_fig, box_fig, heatmap_fig, histogram_fig, barchart_fig, line_fig
+
+        @self.app.callback(
+            Output("theme-store", "data"),
+            Input("theme-selector", "value")
+        )
+        def update_theme_store(selected_theme):
+            return selected_theme
+
+        @self.app.callback(
+            Output("themed-layout", "style"),
+            Input("theme-store", "data")
+        )
+        def update_layout_style(current_theme):
+            if current_theme == "Ciemny":
+                return {
+                    "backgroundColor": "#1e1e1e",
+                    "color": "white",
+                    "padding": "20px",
+                    "padding-left": "200px",
+                    "padding-right": "200px"
+                }
+            else:  # Jasny
+                return {
+                    "backgroundColor": "white",
+                    "color": "black",
+                    "padding": "20px",
+                    "padding-left": "200px",
+                    "padding-right": "200px"
+                }
 
     def run(self, debug: bool = True, host: str = '127.0.0.1', port: int = 8050):
         """Uruchamia aplikację dashboardu."""
