@@ -1,0 +1,25 @@
+/* styl dropdowna w trybie ciemnym */
+.dark-dropdown .Select-control {
+    background-color: #2a2a2a !important;
+    color: white !important;
+    border: 1px solid #444 !important;
+}
+
+.dark-dropdown .Select-menu-outer {
+    background-color: #2a2a2a !important;
+    color: white !important;
+}
+
+.dark-dropdown .Select-option {
+    background-color: #2a2a2a !important;
+    color: white !important;
+}
+
+.dark-dropdown .Select-option.is-focused {
+    background-color: #444 !important;
+    color: white !important;
+}
+
+.dark-dropdown .Select-placeholder {
+    color: #aaa !important;
+}

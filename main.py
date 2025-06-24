@@ -279,9 +279,6 @@ class StudentPerformanceDashboard:
 
         # Definicja struktury HTML dashboardu
         self.app.layout = themed_div([
-            # Nagłówek główny
-            html.H1("📊 Nawyki studentów a wyniki w nauce",
-                    style={"textAlign": "center", "marginBottom": "30px"}),
 
             html.Div([
                 html.Label("🌗 Tryb wyświetlania:", style={"fontWeight": "bold"}),
@@ -296,7 +293,9 @@ class StudentPerformanceDashboard:
                 ),
                 dcc.Store(id='theme-store', data="Jasny")
             ], style={"marginBottom": "20px"}),
-
+            # Nagłówek główny
+            html.H1("📊 Nawyki studentów a wyniki w nauce",
+                    style={"textAlign": "center", "marginBottom": "30px"}),
 
             # Sekcja z filtrami
             html.Div([
@@ -307,7 +306,9 @@ class StudentPerformanceDashboard:
                         id="gender-filter",
                         options=gender_options,
                         multi=True,
-                        placeholder="Wybierz płeć"
+                        placeholder="Wybierz płeć",
+                        style={},
+                        className=""
                     )
                 ], style={"width": "48%", "display": "inline-block"}),
 
@@ -318,7 +319,9 @@ class StudentPerformanceDashboard:
                         id="edu-filter",
                         options=edu_options,
                         multi=True,
-                        placeholder="Wybierz poziom edukacji"
+                        placeholder="Wybierz poziom edukacji",
+                        style={},
+                        className=""
                     )
                 ], style={"width": "48%", "float": "right", "display": "inline-block"}),
             ], style={"marginBottom": "20px"}),
@@ -438,6 +441,37 @@ class StudentPerformanceDashboard:
                     "padding-left": "200px",
                     "padding-right": "200px"
                 }
+
+        @self.app.callback(
+            [Output("gender-filter", "style"),
+             Output("edu-filter", "style")],
+            Input("theme-store", "data")
+        )
+        def update_filter_styles(current_theme):
+            style = self.get_input_style(current_theme)
+            return style, style
+
+        @self.app.callback(
+            [Output("gender-filter", "className"),
+             Output("edu-filter", "className")],
+            Input("theme-store", "data")
+        )
+        def update_dropdown_class(theme):
+            return ["dark-dropdown" if theme == "Ciemny" else "",
+                    "dark-dropdown" if theme == "Ciemny" else ""]
+
+    def get_input_style(self, current_theme):
+        if current_theme == "Ciemny":
+            return {
+                "backgroundColor": "#2a2a2a",
+                "color": "white",
+                "border": "1px solid #444"
+            }
+        else:  # Jasny
+            return {
+                "backgroundColor": "white",
+                "color": "black"
+            }
 
     def run(self, debug: bool = True, host: str = '127.0.0.1', port: int = 8050):
         """Uruchamia aplikację dashboardu."""
