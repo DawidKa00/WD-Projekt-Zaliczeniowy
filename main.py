@@ -54,6 +54,15 @@ class StudentPerformanceDashboard:
             "Ciemny": dbc.themes.DARKLY
         }
 
+    def run(self, debug=False):
+        """Uruchamia aplikację."""
+        self.app.run_server(debug=debug)
+
+    @property
+    def server(self):
+        """Zwraca serwer Flask wymagany do deployu."""
+        return self.app.server
+
     def load_data(self) -> bool:
         """Ładuje i waliduje dane z pliku CSV."""
         download_data_if_needed()
@@ -726,10 +735,11 @@ class StudentPerformanceDashboard:
         print(f"🚀 Uruchamianie dashboardu pod adresem http://{host}:{port}")
         self.app.run(debug=debug, host=host, port=port)
 
+dashboard = StudentPerformanceDashboard()
+server = dashboard.server
+
 # Uruchomienie aplikacji
 if __name__ == '__main__':
     dashboard = StudentPerformanceDashboard()
     dashboard.run(debug=True)
 
-dashboard = StudentPerformanceDashboard()
-server = dashboard.server
