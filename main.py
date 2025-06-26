@@ -39,20 +39,25 @@ class StudentPerformanceDashboard:
     """Klasa reprezentująca dashboard do analizy nawyków studentów w kontekście ich wyników w nauce."""
 
     def __init__(self):
-        """Konstruktor klasy. Inicjalizuje aplikację Dash i przygotowuje miejsce na dane."""
-
-        self.app = dash.Dash(
-            __name__,
-            external_stylesheets=[dbc.themes.FLATLY]
-        )
+        self.app = dash.Dash(__name__, external_stylesheets=[dbc.themes.FLATLY])
         self.app.title = "Nawyki studentów a wyniki w nauce"
-
         self.current_theme = dbc.themes.BOOTSTRAP
 
         self.themes = {
             "Jasny": dbc.themes.FLATLY,
             "Ciemny": dbc.themes.DARKLY
         }
+
+        # ✅ Zawsze próbuj załadować dane i ustawić layout
+        if not self.load_data():
+            print("❌ Nie udało się załadować danych — layout awaryjny")
+            self.app.layout = html.Div([
+                html.H2("Błąd ładowania danych"),
+                html.P("Nie można wyświetlić dashboardu.")
+            ])
+        else:
+            self.setup_layout()
+            self.setup_callbacks()
 
     @property
     def server(self):
@@ -716,19 +721,8 @@ class StudentPerformanceDashboard:
                 "color": "black"
             }
 
-    def run(self, debug: bool = True, host: str = '127.0.0.1', port: int = 8050):
-        """Uruchamia aplikację dashboardu."""
-        # Najpierw spróbuj załadować dane. Jeśli się nie uda, zakończ działanie.
-        if not self.load_data():
-            print("❌ Nie udało się załadować danych. Zamykanie aplikacji...")
-            return
-
-        # Konfiguracja
-        self.setup_layout()
-        self.setup_callbacks()
-
-        # Uruchom serwer Dash
-        print(f"🚀 Uruchamianie dashboardu pod adresem http://{host}:{port}")
+    def run(self, debug=True, host="127.0.0.1", port=8050):
+        print(f"🚀 Dashboard pod http://{host}:{port}")
         self.app.run(debug=debug, host=host, port=port)
 
 dashboard = StudentPerformanceDashboard()
