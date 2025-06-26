@@ -730,3 +730,6 @@ class StudentPerformanceDashboard:
 if __name__ == '__main__':
     dashboard = StudentPerformanceDashboard()
     dashboard.run(debug=True)
+
+dashboard = StudentPerformanceDashboard()
+server = dashboard.server
