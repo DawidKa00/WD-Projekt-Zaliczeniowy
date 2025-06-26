@@ -54,10 +54,6 @@ class StudentPerformanceDashboard:
             "Ciemny": dbc.themes.DARKLY
         }
 
-    def run(self, debug=False):
-        """Uruchamia aplikację."""
-        self.app.run_server(debug=debug)
-
     @property
     def server(self):
         """Zwraca serwer Flask wymagany do deployu."""
