@@ -34,6 +34,23 @@ Zbiór nadaje się do zadań z zakresu EDA, regresji, klasyfikacji, a także do 
 * Responsywny układ dashboardu
 * Opis i interpretacja każdego wykresu
 
+## 🌐 Link do aplikacji online
+
+[Kliknij tutaj, aby zobaczyć dashboard na żywo](https://wd-projekt-zaliczeniowy.onrender.com/)
+
+## 📝 Podsumowanie wymagań projektu
+
+✔️ Liczba wykresów: 6 (scatter plot, bar chart, pie chart, histogram, boxplot, heatmap)  
+✔️ Różne typy wykresów wykorzystane zgodnie z przeznaczeniem  
+✔️ Możliwość interakcji: filtry dropdown, range sliders  
+✔️ Dobór typów wykresów adekwatny do danych  
+✔️ Formatowanie wykresów: tytuły, opisy osi, legendy, kolory  
+✔️ Spójność i sensowność całości  
+✔️ Estetyka i wytłumaczenia wykresów
+
+## 📷 Przykładowe screeny
+
+![dashboard-1](assets/screen.png)
 
 ## ▶️ Uruchomienie aplikacji lokalnie
 
@@ -57,3 +74,9 @@ Zbiór nadaje się do zadań z zakresu EDA, regresji, klasyfikacji, a także do 
     `python main.py`
 
 Dashboard będzie dostępny pod adresem http://127.0.0.1:8050/.
+
+## 👤 Autorzy
+
+Dawid Kapciak, Konrad Janiszewski  
+Informatyka,  
+Uniwersytet Śląski
